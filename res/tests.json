@@ -1,0 +1,24 @@
+[{
+  "name": "Missing Robots Header",
+  "severity": "Low",
+  "confidence": "Firm",
+  "background": "Short explanation",
+  "detail": "Long explanation",
+  "remediation": "remediation",
+  "checks": {
+    "mimes": ["bmp","cgm","dicom-rle","emf","example","fits","g3fax","jls","jp2","jpm","jpx","naplps","png","prs.btif","prs.pti","pwg-raster","t38","tiff","tiff-fx","vnd.adobe.photoshop","vnd.airzip.accelerator.azv","vnd.cns.inf2","vnd.dece.graphic","vnd-djvu","vnd.dwg","vnd.dxf","vnd.dvb.subtitle","vnd.fastbidsheet","vnd.fpx","vnd.fst","vnd.fujixerox.edmics-mmr","vnd.fujixerox.edmics-rlc","vnd.globalgraphics.pgb","vnd.microsoft.icon","vnd.mix","vnd.ms-modi","vnd.mozilla.apng","vnd.net-fpx","vnd.radiance","vnd.sealed-png","vnd.sealedmedia.softseal-gif","vnd.sealedmedia.softseal-jpg","vnd-svf","vnd.tencent.tap","vnd.valve.source.texture","vnd-wap-wbmp","vnd.xiff","vnd.zbrush.pcx","wmf","emf","wmf"],
+    "check": "X-Robots-Tag"
+  }
+},
+{
+  "name": "Missing XSS Header",
+  "severity": "Low",
+  "confidence": "Certain",
+  "background": "Short explanation",
+  "detail": "Long explanation",
+  "remediation": "remediation",
+  "checks": {
+    "mimes": [],
+    "check": "X-XSS-Protection"
+  }
+}]

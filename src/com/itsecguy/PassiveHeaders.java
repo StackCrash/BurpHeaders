@@ -25,51 +25,57 @@ public class PassiveHeaders
         this.helpers = this.callbacks.getHelpers();
     }
 
-    private List<IScanIssue> testHeader(IHttpRequestResponse requestResponse, Test test)
+    private List<IScanIssue> doHeaderChecks(IHttpRequestResponse requestResponse, HeaderCheck check)
     {
-        //List<String> mimes = Arrays.asList(test.checks.mimes);
         List<String> headers = this.helpers.analyzeResponse(requestResponse.getResponse()).getHeaders();
         Short status = this.helpers.analyzeResponse(requestResponse.getResponse()).getStatusCode();
         
-        //mimes.toString().toLowerCase().matches("\\[.*\\b" + mime.toLowerCase() + "\\b.*]")
-        if(!headers.toString().toLowerCase().contains(test.checks.check.toLowerCase()) && status == 200)
+        boolean goodMime = true;
+        List<String> mimes = Arrays.asList(check.checks.mimes);
+        String mime = this.helpers.analyzeResponse(requestResponse.getResponse()).getStatedMimeType();
+        if(!mimes.isEmpty() && mime != null)
         {
-            //String mime = this.helpers.analyzeResponse(requestResponse.getResponse()).getStatedMimeType();
-
+            goodMime = mimes.toString().toLowerCase().contains(mime.toLowerCase());
+        }
+        
+        if(!headers.toString().toLowerCase().contains(check.checks.check.toLowerCase())
+                && status == 200 && goodMime)
+        {
             List<IScanIssue> issues = new ArrayList<>(1);
             issues.add(utility.new ScanIssue(requestResponse,
-                    test.name,
-                    test.severity,
-                    test.confidence,
-                    test.background,
-                    test.detail,
-                    test.remediation));
+                    check.name,
+                    check.severity,
+                    check.confidence,
+                    check.background,
+                    check.detail,
+                    check.remediation));
             return issues;
         }
         return null;
     }
 
-    private List<Test> getTests()
+    private List<HeaderCheck> getHeaderChecks()
     {
-        Reader reader = new InputStreamReader(getClass().getResourceAsStream("/tests.json"));
+        Reader reader = new InputStreamReader(getClass().getResourceAsStream("/headers.json"));
         Gson gson = new Gson();
-        Test[] tests = gson.fromJson(reader, Test[].class);
+        HeaderCheck[] checks = gson.fromJson(reader, HeaderCheck[].class);
 
-        return Arrays.asList(tests);
+        return Arrays.asList(checks);
     }
 
     public List<IScanIssue> doPassiveScan(IHttpRequestResponse requestResponse)
     {
-        List<Test> tests = getTests();
+        List<HeaderCheck> checks = getHeaderChecks();
         List<IScanIssue> issues = new ArrayList<>(1);
 
-        tests.forEach((test) -> {
-            issues.addAll(testHeader(requestResponse, test));
+        checks.forEach((check) -> {
+            List<IScanIssue> issue = doHeaderChecks(requestResponse, check);
+            if(issue != null) { issues.addAll(issue); }
         });
         return issues;
     }
 
-    private class Test
+    private class HeaderCheck
     {
         public String name;
         public String severity;

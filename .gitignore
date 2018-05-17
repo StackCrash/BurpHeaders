@@ -27,3 +27,8 @@ hs_err_pid*
 /nbproject/
 build.xml
 manifest.mf
+
+#IntelliJ Specific
+/.idea/
+*.iml
+/out/

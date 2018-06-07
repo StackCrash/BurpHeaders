@@ -9,7 +9,7 @@ public class BurpExtender implements IBurpExtender
     public BurpExtender()
     {
         this.name = "Burp Headers";
-        this.version = "0.2";
+        this.version = "0.3";
     }
 
     @Override

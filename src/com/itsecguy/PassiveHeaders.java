@@ -25,11 +25,12 @@ public class PassiveHeaders
         this.helpers = this.callbacks.getHelpers();
     }
 
+    // Perform each check.
     private List<IScanIssue> doHeaderChecks(IHttpRequestResponse requestResponse, HeaderCheck check)
     {
         List<String> headers = this.helpers.analyzeResponse(requestResponse.getResponse()).getHeaders();
-        Short status = this.helpers.analyzeResponse(requestResponse.getResponse()).getStatusCode();
         
+        // Check the MIME types.
         boolean goodMime = true;
         List<String> mimes = Arrays.asList(check.checks.mimes);
         String mime = this.helpers.analyzeResponse(requestResponse.getResponse()).getStatedMimeType();
@@ -38,8 +39,9 @@ public class PassiveHeaders
             goodMime = mimes.toString().toLowerCase().contains(mime.toLowerCase());
         }
         
+        // Create issue if header is missing and an allowed MIME.
         if(!headers.toString().toLowerCase().contains(check.checks.check.toLowerCase())
-                && status == 200 && goodMime)
+                && goodMime)
         {
             List<IScanIssue> issues = new ArrayList<>(1);
             issues.add(utility.new ScanIssue(requestResponse,
@@ -54,6 +56,7 @@ public class PassiveHeaders
         return null;
     }
 
+    // Import the header checks from imbedded JSON.
     private List<HeaderCheck> getHeaderChecks()
     {
         Reader reader = new InputStreamReader(getClass().getResourceAsStream("/headers.json"));
@@ -63,11 +66,21 @@ public class PassiveHeaders
         return Arrays.asList(checks);
     }
 
+    // Loop through each check and execute them.
     public List<IScanIssue> doPassiveScan(IHttpRequestResponse requestResponse)
     {
         List<HeaderCheck> checks = getHeaderChecks();
         List<IScanIssue> issues = new ArrayList<>(1);
-
+        List<String> headers = this.helpers.analyzeResponse(requestResponse.getResponse()).getHeaders();
+        
+        // Ignore none 200 responses
+        if (this.utility.getStatusCode(requestResponse) != 200)
+            return issues;
+        
+        // Ignore responses with no content length
+        if (this.utility.getContentLength(headers) == 0)
+            return issues;
+        
         checks.forEach((check) -> {
             List<IScanIssue> issue = doHeaderChecks(requestResponse, check);
             if(issue != null) { issues.addAll(issue); }

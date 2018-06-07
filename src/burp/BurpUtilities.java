@@ -3,6 +3,7 @@ package burp;
 import com.itsecguy.PassiveHeaders;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
 public class BurpUtilities implements IScannerCheck
@@ -16,6 +17,7 @@ public class BurpUtilities implements IScannerCheck
         this.helpers = this.callbacks.getHelpers();
     }
 
+    // Passive scan
     @Override
     public List<IScanIssue> doPassiveScan(IHttpRequestResponse requestResponse)
     {
@@ -23,12 +25,14 @@ public class BurpUtilities implements IScannerCheck
         return passive.doPassiveScan(requestResponse);
     }
 
+    // Active scan (not used)
     @Override
     public List<IScanIssue> doActiveScan(IHttpRequestResponse requestResponse, IScannerInsertionPoint insertionPoint)
     {
         return null;
     }
 
+    // Consolidate duplicate issues based on name and url.
     @Override
     public int consolidateDuplicateIssues(IScanIssue existingIssue, IScanIssue newIssue)
     {
@@ -41,7 +45,42 @@ public class BurpUtilities implements IScannerCheck
         }
         return 0;
     }
+    
+    // Returns the oddsets of any matches for highlighting.
+    public List<int[]> getOffsets(byte[] response, byte[] match)
+    {
+        List<int[]> matches = new ArrayList<>();
+        for (int i = 0; i < response.length; i += match.length)
+        {
+            i = this.helpers.indexOf(response, match, true, i, response.length);
+            if (i == -1)
+                break;
+            matches.add(new int[] { i, i + match.length });
+        }
+        return matches;
+    }
+    
+    // Return content length value.
+    public int getContentLength(List<String> headers)
+    {
+        for (String header: headers)
+        {
+            if (header.toLowerCase().startsWith("content-length"))
+            {
+                String length = header.toLowerCase().split(" ")[1];
+                return Integer.parseInt(length);
+            }
+        }
+        return 0;
+    }
+    
+    // Return HTTP status code.
+    public short getStatusCode(IHttpRequestResponse requestResponse)
+    {
+        return this.helpers.analyzeResponse(requestResponse.getResponse()).getStatusCode();
+    }
 
+    // Implimentation of custom scanner issue.
     public class ScanIssue implements IScanIssue
     {
         private final IHttpRequestResponse requestResponse;
